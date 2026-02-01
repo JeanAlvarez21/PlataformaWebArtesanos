@@ -178,6 +178,24 @@ body {
   animation: shimmer 1.5s infinite;
 }
 
+.animate-shimmer {
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shrink-width {
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: 0%;
+  }
+}
+
+.animate-shrink-width {
+  animation: shrink-width 4s linear forwards;
+}
+
 /* Glass morphism */
 .glass {
   background: rgba(255, 255, 255, 0.7);

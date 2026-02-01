@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
-import { Users, Home, Bell, Search, Mail, Phone, ShoppingBag, DollarSign, Calendar, Star, MoreVertical } from 'lucide-react';
+import PanelLayout from '@/components/panel/PanelLayout';
+import { Users, Search, Mail, Phone, ShoppingBag, DollarSign, Calendar, Star, MessageCircle, ArrowRight } from 'lucide-react';
 
 interface Customer {
     id: string;
@@ -47,127 +47,121 @@ export default function ClientesPage() {
     const totalRevenue = mockCustomers.reduce((sum, c) => sum + c.totalSpent, 0);
     const avgOrderValue = totalRevenue / totalOrders;
 
+    const stats = [
+        { label: 'Total Clientes', value: totalCustomers, icon: Users, color: 'bg-loja-terracotta' },
+        { label: 'Total Pedidos', value: totalOrders, icon: ShoppingBag, color: 'bg-blue-500' },
+        { label: 'Ingresos Totales', value: `$${totalRevenue.toFixed(0)}`, icon: DollarSign, color: 'bg-green-500' },
+        { label: 'Ticket Promedio', value: `$${avgOrderValue.toFixed(2)}`, icon: Star, color: 'bg-yellow-500' },
+    ];
+
     return (
-        <div className="min-h-screen bg-gray-50">
-            <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="h-16 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <Link href="/" className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-gradient-to-br from-loja-terracotta to-loja-dark rounded-xl flex items-center justify-center text-white font-bold shadow-md">LN</div>
-                            </Link>
-                            <div className="hidden sm:block">
-                                <h1 className="font-bold text-gray-900">Clientes</h1>
-                                <p className="text-xs text-gray-500">Portal Artesano</p>
+        <PanelLayout>
+            {/* Page Header */}
+            <div className="mb-10 animate-slide-in-up">
+                <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-loja-terracotta to-loja-dark rounded-2xl flex items-center justify-center text-white shadow-lg">
+                        <Users size={28} />
+                    </div>
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-black text-loja-dark">Mis Clientes</h1>
+                        <p className="text-gray-500 font-medium">Conoce a quienes apoyan tu trabajo artesanal</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                {stats.map((stat, i) => (
+                    <div
+                        key={stat.label}
+                        className="bg-white rounded-[2rem] p-5 shadow-lg border border-gray-100 animate-fade-in hover:shadow-xl transition-shadow"
+                        style={{ animationDelay: `${i * 50}ms` }}
+                    >
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{stat.label}</p>
+                                <p className="text-2xl font-black text-loja-dark">{stat.value}</p>
+                            </div>
+                            <div className={`w-12 h-12 ${stat.color} rounded-2xl flex items-center justify-center text-white shadow-lg`}>
+                                <stat.icon size={22} />
                             </div>
                         </div>
-                        <nav className="hidden md:flex items-center gap-1">
-                            <Link href="/panel" className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl font-medium text-sm transition-colors">Dashboard</Link>
-                            <Link href="/panel/productos" className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl font-medium text-sm transition-colors">Productos</Link>
-                            <Link href="/panel/pedidos" className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl font-medium text-sm transition-colors">Pedidos</Link>
-                            <Link href="/panel/clientes" className="px-4 py-2 bg-loja-terracotta/10 text-loja-terracotta rounded-xl font-medium text-sm">Clientes</Link>
-                        </nav>
-                        <div className="flex items-center gap-3">
-                            <button className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-xl transition-colors">
-                                <Bell size={20} /><span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                    </div>
+                ))}
+            </div>
+
+            {/* Search */}
+            <div className="bg-white rounded-[2rem] p-5 shadow-lg border border-gray-100 mb-8">
+                <div className="relative">
+                    <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                        type="text"
+                        placeholder="Buscar clientes..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-100 focus:bg-white focus:border-loja-terracotta focus:ring-4 focus:ring-loja-terracotta/10 outline-none font-medium transition-all"
+                    />
+                </div>
+            </div>
+
+            {/* Customers Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredCustomers.map((customer, i) => (
+                    <div
+                        key={customer.id}
+                        className="bg-white rounded-[2.5rem] p-6 shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all animate-fade-in"
+                        style={{ animationDelay: `${i * 50}ms` }}
+                    >
+                        <div className="flex items-start justify-between mb-5">
+                            <div className="flex items-center gap-4">
+                                <div className="w-14 h-14 bg-gradient-to-br from-loja-terracotta to-loja-dark rounded-2xl flex items-center justify-center text-white font-black text-lg shadow-lg">
+                                    {customer.avatar}
+                                </div>
+                                <div>
+                                    <h3 className="font-black text-loja-dark">{customer.name}</h3>
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{customer.orders} pedidos</p>
+                                </div>
+                            </div>
+                            <button className="w-10 h-10 bg-loja-terracotta/10 hover:bg-loja-terracotta hover:text-white rounded-xl flex items-center justify-center text-loja-terracotta transition-all">
+                                <MessageCircle size={18} />
                             </button>
-                            <Link href="/" className="hidden sm:flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl font-medium text-sm transition-colors"><Home size={16} />Ver Tienda</Link>
                         </div>
-                    </div>
-                </div>
-            </header>
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="mb-8 animate-slide-in-up">
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Mis Clientes</h1>
-                    <p className="text-gray-500 mt-1">Conoce a quienes apoyan tu trabajo artesanal</p>
-                </div>
-
-                {/* Stats */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                    {[
-                        { label: 'Total Clientes', value: totalCustomers, icon: Users, color: 'loja-terracotta' },
-                        { label: 'Total Pedidos', value: totalOrders, icon: ShoppingBag, color: 'loja-blue' },
-                        { label: 'Ingresos Totales', value: `$${totalRevenue.toFixed(0)}`, icon: DollarSign, color: 'loja-green' },
-                        { label: 'Ticket Promedio', value: `$${avgOrderValue.toFixed(2)}`, icon: Star, color: 'yellow-500' },
-                    ].map((stat, i) => (
-                        <div key={stat.label} className="bg-white rounded-2xl p-5 shadow-sm animate-fade-in" style={{ animationDelay: `${i * 50}ms` }}>
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-gray-500 text-sm">{stat.label}</p>
-                                    <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
-                                </div>
-                                <div className={`w-12 h-12 bg-${stat.color}/10 rounded-xl flex items-center justify-center`}>
-                                    <stat.icon size={24} className={`text-${stat.color}`} />
-                                </div>
+                        <div className="space-y-3 mb-5">
+                            <div className="flex items-center gap-3 text-sm text-gray-500">
+                                <Mail size={14} className="text-gray-400" />
+                                <span className="truncate font-medium">{customer.email}</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-sm text-gray-500">
+                                <Phone size={14} className="text-gray-400" />
+                                <span className="font-medium">{customer.phone}</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-sm text-gray-500">
+                                <Calendar size={14} className="text-gray-400" />
+                                <span className="font-medium">Último: {customer.lastOrder}</span>
                             </div>
                         </div>
-                    ))}
-                </div>
 
-                {/* Search */}
-                <div className="bg-white rounded-2xl p-4 shadow-sm mb-6">
-                    <div className="relative">
-                        <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                        <input type="text" placeholder="Buscar clientes..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-loja-terracotta focus:ring-2 focus:ring-loja-terracotta/20 outline-none" />
-                    </div>
-                </div>
-
-                {/* Customers Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredCustomers.map((customer, i) => (
-                        <div key={customer.id} className="bg-white rounded-2xl p-6 shadow-sm card-hover animate-fade-in" style={{ animationDelay: `${i * 50}ms` }}>
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-14 h-14 bg-gradient-to-br from-loja-terracotta to-loja-dark rounded-2xl flex items-center justify-center text-white font-bold text-lg">
-                                        {customer.avatar}
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-gray-900">{customer.name}</h3>
-                                        <p className="text-sm text-gray-500">{customer.orders} pedidos</p>
-                                    </div>
-                                </div>
-                                <button className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors">
-                                    <MoreVertical size={18} />
-                                </button>
+                        <div className="pt-5 border-t border-gray-100 flex items-center justify-between">
+                            <div>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total gastado</p>
+                                <p className="text-2xl font-black text-loja-terracotta">${customer.totalSpent.toFixed(2)}</p>
                             </div>
-
-                            <div className="space-y-3 mb-4">
-                                <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <Mail size={16} className="text-gray-400" />
-                                    <span className="truncate">{customer.email}</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <Phone size={16} className="text-gray-400" />
-                                    <span>{customer.phone}</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <Calendar size={16} className="text-gray-400" />
-                                    <span>Último pedido: {customer.lastOrder}</span>
-                                </div>
-                            </div>
-
-                            <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs text-gray-500">Total gastado</p>
-                                    <p className="text-xl font-bold text-loja-terracotta">${customer.totalSpent.toFixed(2)}</p>
-                                </div>
-                                <button className="px-4 py-2 text-loja-blue hover:bg-loja-blue/10 rounded-xl font-medium text-sm transition-colors">
-                                    Ver Perfil
-                                </button>
-                            </div>
+                            <button className="flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-loja-dark hover:text-white rounded-xl font-bold text-xs uppercase tracking-widest text-gray-400 transition-all">
+                                Ver <ArrowRight size={14} />
+                            </button>
                         </div>
-                    ))}
-                </div>
-
-                {filteredCustomers.length === 0 && (
-                    <div className="text-center py-16">
-                        <Users size={48} className="mx-auto text-gray-300 mb-4" />
-                        <h3 className="text-lg font-semibold text-gray-800 mb-2">No se encontraron clientes</h3>
-                        <p className="text-gray-500">Intenta con otros términos de búsqueda</p>
                     </div>
-                )}
-            </main>
-        </div>
+                ))}
+            </div>
+
+            {filteredCustomers.length === 0 && (
+                <div className="text-center py-20 bg-white rounded-[3rem] shadow-lg border border-gray-100">
+                    <Users size={56} className="mx-auto text-gray-300 mb-4" />
+                    <h3 className="text-xl font-black text-loja-dark mb-2">No se encontraron clientes</h3>
+                    <p className="text-gray-500">Intenta con otros términos de búsqueda</p>
+                </div>
+            )}
+        </PanelLayout>
     );
 }
