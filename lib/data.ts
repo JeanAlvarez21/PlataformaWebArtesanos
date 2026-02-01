@@ -3,15 +3,17 @@ export interface Artisan {
   name: string;
   story: string;
   photo: string;
+  coverPhoto: string;
   location: string;
   badges: ('Trusted' | 'Verificado' | 'Sostenible' | 'Maestro')[];
   rating: number;
+  reviews: number;
   contact: {
     phone: string;
     email: string;
     website?: string;
   };
-  description: string; // Detailed bio
+  description: string;
 }
 
 export interface Variation {
@@ -28,7 +30,7 @@ export interface Product {
   artisanId: string;
   stock: number;
   description: string;
-  productStory: string; // The specific story of this item
+  productStory: string;
   variations?: Variation[];
 }
 
@@ -46,44 +48,50 @@ export const artisans: Artisan[] = [
     id: 'a1',
     name: 'María Guamán',
     story: 'Heredera de una tradición de tres generaciones en el tejido de lana de oveja en Saraguro.',
-    photo: '/placeholder-artisan-1.jpg',
+    photo: '/artisan-maria.png',
+    coverPhoto: '/artisan-maria.png',
     location: 'Saraguro, Loja',
     badges: ['Trusted', 'Verificado', 'Maestro'],
     rating: 4.9,
+    reviews: 127,
     contact: {
       phone: '+593 99 123 4567',
       email: 'maria.guaman@artesanias.ec'
     },
-    description: 'María lleva tejiendo desde los 12 años. Su taller en el centro de Saraguro es un punto de encuentro para mujeres de la comunidad que buscan preservar las técnicas ancestrales del telar de cintura.'
+    description: 'María lleva tejiendo desde los 12 años. Su taller en el centro de Saraguro es un punto de encuentro para mujeres de la comunidad que buscan preservar las técnicas ancestrales del telar de cintura. Cada pieza que crea cuenta una historia de resistencia y amor por las tradiciones.'
   },
   {
     id: 'a2',
     name: 'Carlos Jaramillo',
     story: 'Maestro ceramista especializado en técnicas precolombinas adaptadas al diseño moderno.',
-    photo: '/placeholder-artisan-2.jpg',
+    photo: '/artisan-carlos.png',
+    coverPhoto: '/artisan-carlos.png',
     location: 'Malacatos, Loja',
     badges: ['Verificado', 'Sostenible'],
     rating: 4.7,
+    reviews: 89,
     contact: {
       phone: '+593 98 765 4321',
       email: 'carlos.barro@loja.ec',
       website: 'www.barromalacatos.com'
     },
-    description: 'Carlos utiliza arcilla extraída localmente y pigmentos naturales. Su enfoque es la sostenibilidad, reciclando el agua utilizada en el proceso y utilizando hornos de bajo consumo.'
+    description: 'Carlos utiliza arcilla extraída localmente y pigmentos naturales. Su enfoque es la sostenibilidad, reciclando el agua utilizada en el proceso y utilizando hornos de bajo consumo. Cada pieza de cerámica es única, moldeada con paciencia y cocida con sabiduría ancestral.'
   },
   {
     id: 'a3',
     name: 'Finca El Bosque',
     story: 'Café de altura cultivado a 1800msnm. Proceso artesanal desde la cosecha hasta el tostado.',
-    photo: '/placeholder-artisan-3.jpg',
+    photo: '/artisan-finca.png',
+    coverPhoto: '/artisan-finca.png',
     location: 'Vilcabamba, Loja',
     badges: ['Trusted', 'Sostenible', 'Verificado'],
     rating: 5.0,
+    reviews: 234,
     contact: {
       phone: '+593 99 999 0000',
       email: 'ventas@fincaelbosque.loja'
     },
-    description: 'Ubicados en el valle de la longevidad, Finca El Bosque produce uno de los cafés más premiados de la región sur. Cada grano es seleccionado a mano para garantizar una taza perfecta.'
+    description: 'Ubicados en el valle de la longevidad, Finca El Bosque produce uno de los cafés más premiados de la región sur. Cada grano es seleccionado a mano para garantizar una taza perfecta. Nuestro compromiso con la sostenibilidad nos ha llevado a implementar prácticas de cultivo orgánico.'
   }
 ];
 
@@ -92,7 +100,7 @@ export const products: Product[] = [
     id: 'p1',
     name: 'Poncho Saraguro Tradicional',
     price: 85.00,
-    image: '/placeholder-poncho.jpg',
+    image: '/product-poncho.png',
     category: 'Textiles',
     artisanId: 'a1',
     stock: 5,
@@ -107,7 +115,7 @@ export const products: Product[] = [
     id: 'p2',
     name: 'Juego de Tazas "Amanecer"',
     price: 45.00,
-    image: '/placeholder-cups.jpg',
+    image: '/product-cups.png',
     category: 'Cerámica',
     artisanId: 'a2',
     stock: 12,
@@ -122,7 +130,7 @@ export const products: Product[] = [
     id: 'p3',
     name: 'Café de Especialidad 400g',
     price: 12.50,
-    image: '/placeholder-coffee.jpg',
+    image: '/product-coffee.png',
     category: 'Café',
     artisanId: 'a3',
     stock: 50,
@@ -138,7 +146,7 @@ export const products: Product[] = [
     id: 'p4',
     name: 'Bolso Tejido a Mano',
     price: 35.00,
-    image: '/placeholder-bag.jpg',
+    image: '/product-bag.png',
     category: 'Textiles',
     artisanId: 'a1',
     stock: 8,
@@ -153,7 +161,7 @@ export const products: Product[] = [
     id: 'p5',
     name: 'Florero de Barro Negro',
     price: 28.00,
-    image: '/placeholder-vase.jpg',
+    image: '/product-vase.png',
     category: 'Cerámica',
     artisanId: 'a2',
     stock: 3,
@@ -171,3 +179,18 @@ export const orders: Order[] = [
   { id: 'ORD-002', customer: 'Luis Torres', total: 12.50, status: 'Listo para envío', date: '2026-01-03', items: 1 },
   { id: 'ORD-003', customer: 'Elena Vaca', total: 120.00, status: 'Entregado', date: '2025-12-28', items: 3 },
 ];
+
+// Helper function to get artisan by ID
+export function getArtisanById(id: string): Artisan | undefined {
+  return artisans.find(a => a.id === id);
+}
+
+// Helper function to get products by artisan
+export function getProductsByArtisan(artisanId: string): Product[] {
+  return products.filter(p => p.artisanId === artisanId);
+}
+
+// Helper function to get product by ID
+export function getProductById(id: string): Product | undefined {
+  return products.find(p => p.id === id);
+}

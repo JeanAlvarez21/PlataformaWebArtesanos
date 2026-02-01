@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { X, ShoppingCart, ShieldCheck, MapPin, Star, Phone, Mail, Package } from 'lucide-react';
-import { Product, Artisan, artisans } from '@/lib/data';
-import Link from 'next/link';
+import React, { useState } from 'react';
+import Image from 'next/image';
+import { X, Plus, Minus, ShoppingCart, Heart, MapPin, Star, Truck, Shield, RotateCcw } from 'lucide-react';
+import { Product, getArtisanById } from '@/lib/data';
 import { useCart } from '@/lib/CartContext';
+import { useToast } from '@/lib/ToastContext';
+import Link from 'next/link';
 
 interface ProductModalProps {
   product: Product | null;
@@ -13,172 +15,233 @@ interface ProductModalProps {
 }
 
 export default function ProductModal({ product, isOpen, onClose }: ProductModalProps) {
-  const { addToCart } = useCart();
-  const [selectedVariant, setSelectedVariant] = useState<string | undefined>(undefined);
-  
-  // Reset selection when product changes
-  useEffect(() => {
-    if (product?.variations && product.variations.length > 0) {
-      setSelectedVariant(product.variations[0].name);
-    } else {
-      setSelectedVariant(undefined);
-    }
-  }, [product]);
+  const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } = useCart();
+  const { showToast } = useToast();
+  const [selectedVariation, setSelectedVariation] = useState<string | undefined>(undefined);
+  const [quantity, setQuantity] = useState(1);
 
   if (!isOpen || !product) return null;
 
-  const artisan = artisans.find(a => a.id === product.artisanId);
-  
-  // Determine current stock based on selection
-  const currentStock = selectedVariant && product.variations
-    ? product.variations.find(v => v.name === selectedVariant)?.stock || 0
-    : product.stock;
+  const artisan = getArtisanById(product.artisanId);
+  const inWishlist = isInWishlist(product.id);
+
+  const currentVariation = product.variations?.find(v => v.name === selectedVariation);
+  const availableStock = currentVariation?.stock ?? product.stock;
 
   const handleAddToCart = () => {
-    addToCart(product, selectedVariant);
+    for (let i = 0; i < quantity; i++) {
+      addToCart(product, selectedVariation || product.variations?.[0]?.name);
+    }
+    showToast(`${quantity}x ${product.name} añadido al carrito`, 'success');
     onClose();
   };
 
+  const handleWishlistToggle = () => {
+    if (inWishlist) {
+      removeFromWishlist(product.id);
+      showToast('Eliminado de favoritos', 'info');
+    } else {
+      addToWishlist(product);
+      showToast('Añadido a favoritos', 'success');
+    }
+  };
+
+  // Reset state when modal opens with new product
+  React.useEffect(() => {
+    if (isOpen && product) {
+      setSelectedVariation(product.variations?.[0]?.name);
+      setQuantity(1);
+    }
+  }, [isOpen, product]);
+
   return (
     <div className="fixed inset-0 z-[60] overflow-y-auto">
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose} />
-      
-      <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-        <div className="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-4xl border border-gray-100">
-          
-          <button 
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div className="flex min-h-full items-center justify-center p-4">
+        <div className="relative bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto animate-scale-in">
+
+          {/* Close Button */}
+          <button
             onClick={onClose}
-            className="absolute top-4 right-4 z-10 p-2 bg-white/80 rounded-full hover:bg-gray-100 transition-colors"
+            className="absolute top-4 right-4 z-20 p-2 bg-white/90 hover:bg-white rounded-full shadow-md transition-colors"
           >
-            <X size={24} className="text-gray-500" />
+            <X size={20} className="text-gray-500" />
           </button>
 
-          <div className="flex flex-col md:flex-row">
-            {/* Product Image Side */}
-            <div className="md:w-1/2 bg-gray-100 relative min-h-[300px] md:min-h-[500px]">
-               {/* Image Placeholder */}
-               <div className="absolute inset-0 flex items-center justify-center text-gray-400 font-medium text-xl bg-gray-200">
-                 [Imagen: {product.name}]
-               </div>
-               <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-loja-terracotta uppercase tracking-wider shadow-sm">
-                 {product.category}
-               </div>
-            </div>
+          <div className="grid md:grid-cols-2 gap-0">
+            {/* Product Image */}
+            <div className="relative h-80 md:h-full min-h-[400px] bg-gray-100">
+              <Image
+                src={product.image}
+                alt={product.name}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
 
-            {/* Content Side */}
-            <div className="md:w-1/2 p-8 flex flex-col max-h-[90vh] overflow-y-auto">
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h2>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="text-2xl font-bold text-loja-blue">${product.price.toFixed(2)}</div>
-                  <div className="flex items-center gap-2 text-sm font-medium text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-                    <Package size={14} />
-                    <span>Stock: {currentStock} un.</span>
-                  </div>
+              {/* Badges */}
+              <div className="absolute top-4 left-4 flex flex-col gap-2">
+                <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-yellow-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
+                  ✨ LojaNia
                 </div>
-                
-                {/* Variations */}
-                {product.variations && product.variations.length > 0 && (
-                  <div className="mb-6">
-                    <label className="text-sm font-bold text-gray-700 block mb-2">Opciones Disponibles:</label>
-                    <div className="flex flex-wrap gap-2">
-                      {product.variations.map((v) => (
-                        <button
-                          key={v.name}
-                          onClick={() => setSelectedVariant(v.name)}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${
-                            selectedVariant === v.name
-                              ? 'bg-loja-dark text-white border-loja-dark ring-2 ring-loja-dark/20'
-                              : 'bg-white text-gray-600 border-gray-200 hover:border-loja-terracotta'
-                          }`}
-                        >
-                          {v.name}
-                        </button>
-                      ))}
-                    </div>
+                {availableStock <= 3 && availableStock > 0 && (
+                  <div className="bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
+                    ¡Últimas unidades!
                   </div>
                 )}
+              </div>
+            </div>
 
-                <div className="prose prose-sm text-gray-600 mb-8">
-                  <p className="font-medium text-gray-800 mb-2">Descripción</p>
-                  <p className="mb-4">{product.description}</p>
-                  
-                  <div className="bg-loja-beige/30 p-4 rounded-lg border-l-4 border-loja-terracotta">
-                    <p className="font-serif italic text-gray-700">"{product.productStory}"</p>
-                  </div>
-                </div>
-
-                <button 
-                  onClick={handleAddToCart}
-                  disabled={currentStock === 0}
-                  className={`w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl transform active:scale-95 ${
-                    currentStock > 0 
-                      ? 'bg-loja-blue text-white hover:bg-loja-dark' 
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
+            {/* Product Info */}
+            <div className="p-6 md:p-8 flex flex-col">
+              {/* Category & Wishlist */}
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold text-loja-terracotta uppercase tracking-wider">
+                  {product.category}
+                </span>
+                <button
+                  onClick={handleWishlistToggle}
+                  className={`p-2 rounded-full transition-colors ${inWishlist
+                    ? 'bg-red-100 text-red-500'
+                    : 'bg-gray-100 text-gray-400 hover:text-red-500'
+                    }`}
                 >
-                  <ShoppingCart size={20} />
-                  {currentStock > 0 ? 'Añadir al Carrito' : 'Agotado'}
+                  <Heart size={20} fill={inWishlist ? 'currentColor' : 'none'} />
                 </button>
               </div>
 
-              {/* Artisan Profile Section */}
+              {/* Product Name */}
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                {product.name}
+              </h2>
+
+              {/* Artisan Link */}
               {artisan && (
-                <div className="mt-10 pt-8 border-t border-gray-100">
-                  <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Sobre el Artesano</h3>
-                  
-                  <Link href={`/artesanos/${artisan.id}`} className="group block bg-gray-50 rounded-xl p-5 border border-gray-200 hover:border-loja-terracotta transition-colors">
-                    <div className="flex items-start gap-4">
-                      <div className="w-16 h-16 bg-gray-300 rounded-full flex-shrink-0 overflow-hidden group-hover:ring-2 ring-loja-terracotta transition-all">
-                        {/* Avatar Placeholder */}
-                        <div className="w-full h-full bg-loja-terracotta/20 flex items-center justify-center text-loja-terracotta font-bold text-xl">
-                          {artisan.name.charAt(0)}
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start">
-                           <h4 className="font-bold text-gray-900 text-lg group-hover:text-loja-terracotta transition-colors">{artisan.name}</h4>
-                           <div className="flex items-center gap-1 bg-yellow-100 px-2 py-0.5 rounded text-xs font-bold text-yellow-700">
-                             <Star size={10} fill="currentColor" />
-                             {artisan.rating}
-                           </div>
-                        </div>
-                        
-                        <div className="flex flex-wrap gap-2 mt-2 mb-3">
-                          {artisan.badges.includes('Trusted') && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                              <ShieldCheck size={10} /> Trusted
-                            </span>
-                          )}
-                          {artisan.badges.includes('Verificado') && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                              Verificado
-                            </span>
-                          )}
-                        </div>
+                <Link
+                  href={`/artesanos/${artisan.id}`}
+                  onClick={onClose}
+                  className="flex items-center gap-2 mb-4 group"
+                >
+                  <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 relative">
+                    <Image
+                      src={artisan.photo}
+                      alt={artisan.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 group-hover:text-loja-terracotta transition-colors">
+                      {artisan.name}
+                    </p>
+                    <p className="text-xs text-gray-500 flex items-center gap-1">
+                      <MapPin size={10} /> {artisan.location}
+                    </p>
+                  </div>
+                  <div className="ml-auto flex items-center gap-1 text-yellow-500">
+                    <Star size={14} fill="currentColor" />
+                    <span className="text-sm font-medium text-gray-700">{artisan.rating}</span>
+                  </div>
+                </Link>
+              )}
 
-                        <div className="text-xs text-gray-500 flex items-center gap-1 mb-3">
-                          <MapPin size={12} />
-                          {artisan.location}
-                        </div>
-                        
-                        <p className="text-sm text-gray-600 mb-4 line-clamp-3">
-                          {artisan.description}
-                        </p>
+              {/* Price */}
+              <div className="flex items-baseline gap-2 mb-4">
+                <span className="text-3xl font-bold text-loja-dark">${product.price.toFixed(2)}</span>
+                <span className="text-sm text-gray-500">USD</span>
+              </div>
 
-                        <div className="grid grid-cols-2 gap-2">
-                           <button className="flex items-center justify-center gap-2 text-xs font-semibold bg-white border border-gray-300 py-2 rounded-lg hover:bg-gray-50 transition-colors" onClick={(e) => e.preventDefault()}>
-                             <Phone size={12} /> Contactar
-                           </button>
-                           <button className="flex items-center justify-center gap-2 text-xs font-semibold bg-white border border-gray-300 py-2 rounded-lg hover:bg-gray-50 transition-colors" onClick={(e) => e.preventDefault()}>
-                             <Mail size={12} /> Mensaje
-                           </button>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
+              {/* Description */}
+              <p className="text-gray-600 mb-4 leading-relaxed">
+                {product.description}
+              </p>
+
+              {/* Product Story */}
+              <div className="bg-loja-beige/50 p-4 rounded-xl mb-6 border-l-4 border-loja-terracotta">
+                <h4 className="font-semibold text-loja-dark text-sm mb-1">Historia del producto</h4>
+                <p className="text-sm text-gray-600 italic">"{product.productStory}"</p>
+              </div>
+
+              {/* Variations */}
+              {product.variations && product.variations.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="font-semibold text-gray-800 mb-3">Variación</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {product.variations.map((variation) => (
+                      <button
+                        key={variation.name}
+                        onClick={() => setSelectedVariation(variation.name)}
+                        disabled={variation.stock === 0}
+                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${selectedVariation === variation.name
+                          ? 'bg-loja-dark text-white shadow-md'
+                          : variation.stock === 0
+                            ? 'bg-gray-100 text-gray-400 line-through cursor-not-allowed'
+                            : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
+                          }`}
+                      >
+                        {variation.name}
+                        {variation.stock <= 3 && variation.stock > 0 && (
+                          <span className="ml-1 text-xs text-red-500">({variation.stock})</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
+
+              {/* Quantity & Add to Cart */}
+              <div className="flex items-center gap-4 mb-6">
+                <div className="flex items-center border border-gray-200 rounded-xl">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="p-3 hover:bg-gray-50 transition-colors rounded-l-xl"
+                  >
+                    <Minus size={16} />
+                  </button>
+                  <span className="w-12 text-center font-semibold">{quantity}</span>
+                  <button
+                    onClick={() => setQuantity(Math.min(availableStock, quantity + 1))}
+                    className="p-3 hover:bg-gray-50 transition-colors rounded-r-xl"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+
+                <button
+                  onClick={handleAddToCart}
+                  disabled={availableStock === 0}
+                  className={`flex-1 py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 btn-press ${availableStock === 0
+                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                    : 'bg-loja-terracotta text-white hover:bg-loja-dark shadow-lg hover:shadow-xl'
+                    }`}
+                >
+                  <ShoppingCart size={20} />
+                  {availableStock === 0 ? 'Agotado' : `Añadir al Carrito`}
+                </button>
+              </div>
+
+              {/* Trust Badges */}
+              <div className="grid grid-cols-3 gap-2 pt-4 border-t border-gray-100">
+                <div className="flex flex-col items-center text-center p-2">
+                  <Truck size={20} className="text-loja-green mb-1" />
+                  <span className="text-xs text-gray-600">Envío gratis +$50</span>
+                </div>
+                <div className="flex flex-col items-center text-center p-2">
+                  <Shield size={20} className="text-loja-blue mb-1" />
+                  <span className="text-xs text-gray-600">Compra segura</span>
+                </div>
+                <div className="flex flex-col items-center text-center p-2">
+                  <RotateCcw size={20} className="text-loja-terracotta mb-1" />
+                  <span className="text-xs text-gray-600">30 días devolución</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

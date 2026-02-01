@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" fill="none">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#C75D3A"/>
+      <stop offset="100%" style="stop-color:#2C1810"/>
+    </linearGradient>
+  </defs>
+  <!-- Coffee bean icon -->
+  <ellipse cx="20" cy="25" rx="15" ry="20" fill="url(#logoGradient)"/>
+  <path d="M20 8 Q15 25 20 42" stroke="#fff" stroke-width="2" fill="none" opacity="0.6"/>
+  <!-- Text -->
+  <text x="45" y="35" font-family="Georgia, serif" font-size="28" font-weight="bold">
+    <tspan fill="#2C1810">Loja</tspan><tspan fill="#C75D3A">Nia</tspan>
+  </text>
+</svg>

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
-import FloatingToggle from "@/components/FloatingToggle";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Origen Loja - Artesanías Auténticas",
+  title: "LojaNia - Artesanías Auténticas de Loja",
   description: "Plataforma de comercio electrónico especializada en artesanos de Loja, Ecuador.",
 };
 
@@ -30,7 +29,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-loja-beige text-loja-dark`}
       >
         <Providers>
-          <FloatingToggle />
           <main className="min-h-screen">
             {children}
           </main>

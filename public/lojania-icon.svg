@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#C75D3A"/>
+      <stop offset="100%" style="stop-color:#2C1810"/>
+    </linearGradient>
+  </defs>
+  <!-- Coffee bean stylized as L -->
+  <ellipse cx="50" cy="50" rx="35" ry="45" fill="url(#iconGradient)"/>
+  <path d="M50 10 Q35 50 50 90" stroke="#fff" stroke-width="4" fill="none" opacity="0.5"/>
+  <text x="50" y="62" text-anchor="middle" font-family="Georgia, serif" font-size="32" font-weight="bold" fill="#fff">LN</text>
+</svg>
