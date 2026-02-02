@@ -342,7 +342,7 @@ export default function Navbar() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="font-bold text-gray-900 group-hover:text-loja-terracotta transition-colors truncate">{artisan.name}</p>
-                              <p className="text-xs text-gray-500">{artisan.location}</p>
+                              <p className="text-xs text-gray-500">{artisan.specialty}</p>
                             </div>
                             <span className="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-black rounded-full uppercase tracking-widest">Verificado</span>
                             <ArrowRight size={18} className="text-gray-300 group-hover:text-loja-terracotta group-hover:translate-x-1 transition-all" />

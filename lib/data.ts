@@ -2,6 +2,7 @@ export interface Artisan {
   id: string;
   name: string;
   story: string;
+  specialty: string;
   photo: string;
   coverPhoto: string;
   location: string;
@@ -48,6 +49,7 @@ export const artisans: Artisan[] = [
     id: 'a1',
     name: 'María Guamán',
     story: 'Heredera de una tradición de tres generaciones en el tejido de lana de oveja en Saraguro.',
+    specialty: 'Tejido Ancestral',
     photo: '/artisan-maria.png',
     coverPhoto: '/artisan-maria.png',
     location: 'Saraguro, Loja',
@@ -64,6 +66,7 @@ export const artisans: Artisan[] = [
     id: 'a2',
     name: 'Carlos Jaramillo',
     story: 'Maestro ceramista especializado en técnicas precolombinas adaptadas al diseño moderno.',
+    specialty: 'Cerámica Precolombina',
     photo: '/artisan-carlos.png',
     coverPhoto: '/artisan-carlos.png',
     location: 'Malacatos, Loja',
@@ -81,6 +84,7 @@ export const artisans: Artisan[] = [
     id: 'a3',
     name: 'Finca El Bosque',
     story: 'Café de altura cultivado a 1800msnm. Proceso artesanal desde la cosecha hasta el tostado.',
+    specialty: 'Cultivo de Café Especial',
     photo: '/artisan-finca.png',
     coverPhoto: '/artisan-finca.png',
     location: 'Vilcabamba, Loja',
